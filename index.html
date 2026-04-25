@@ -170,6 +170,7 @@
         const step = nextId === 'screen-q1' ? 25 : nextId === 'screen-q2' ? 50 : nextId === 'screen-q3' ? 75 : 100;
         document.getElementById('progressBar').style.width = step + '%';
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(sendHeight, 100);
     }
 
     function selectSingle(btn, q, val) {
@@ -309,9 +310,19 @@
         document.getElementById('progressBar').style.width = '0%';
         document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
         document.getElementById('screen-start').classList.remove('hidden');
-        document.getElementById('footer-note').classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(sendHeight, 100);
     }
+
+    // ── AUTO-HÖHE FÜR IFRAME-EINBINDUNG IN JIMDO ──
+    function sendHeight() {
+        const height = document.body.scrollHeight;
+        window.parent.postMessage({ iframeHeight: height }, '*');
+    }
+    window.addEventListener('load', sendHeight);
+    new MutationObserver(sendHeight).observe(document.body, {
+        subtree: true, childList: true, attributes: true
+    });
 </script>
 
 </body>
