@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prüfungsstress-Check | Mentallions</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root { --primary: #a8dadc; --secondary: #457b9d; --accent: #f1faee; --text: #1d3557; --button: #e63946; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--accent); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; line-height: 1.6; }
+        .container { max-width: 600px; width: 100%; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .hidden { display: none; }
+        h1 { color: var(--secondary); font-size: 1.5rem; text-align: center; }
+        h2 { color: var(--secondary); }
+        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 12px; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
+        .btn-start { background-color: var(--secondary); color: white; }
+        .btn-option { background-color: var(--primary); color: var(--text); text-align: left; }
+        .btn-option.selected { background-color: var(--secondary); color: white; }
+        .btn-next { background-color: var(--button); color: white; margin-top: 20px; }
+        .progress { height: 8px; background: #eee; border-radius: 4px; margin-bottom: 20px; }
+        .progress-bar { height: 100%; background: var(--secondary); width: 0%; border-radius: 4px; transition: width 0.3s; }
+        .result-box { padding: 20px; border: 2px dashed var(--secondary); border-radius: 15px; margin: 20px 0; background: #f9f9f9; }
+        .footer-note { font-size: 0.8rem; color: #777; text-align: center; margin-top: 40px; }
+        .export-btn { background-color: #2a9d8f; color: white; }
+        .privacy-note { font-size: 0.85rem; background: #e8f5e9; border-left: 4px solid #2a9d8f; padding: 10px 14px; border-radius: 6px; margin: 12px 0; color: #1d3557; }
+        .exercise-card { background: var(--accent); padding: 14px 16px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid var(--secondary); }
+        .exercise-card strong { display: block; margin-bottom: 4px; }
+        .plan-day { display: flex; gap: 12px; align-items: flex-start; background: #eaf6f6; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+        .plan-day-num { background: var(--secondary); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 0.9rem; }
+        .hint-multi { font-size: 0.85rem; color: #666; margin-bottom: 8px; }
+        .cta-box { background: #fff8e1; border-radius: 12px; padding: 18px; margin: 20px 0; }
+        .cta-box ul { padding-left: 20px; margin: 8px 0; }
+        .cta-box li { margin-bottom: 4px; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div id="progressContainer" class="hidden">
+        <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+    </div>
+
+    <!-- START -->
+    <div id="screen-start">
+        <h1>Prüfungsstress-Check:<br>Wie bereit bist du für deine Schularbeit?</h1>
+        <p>Viele Kinder können den Stoff – und sind trotzdem nervös oder haben Angst.<br>
+        Finde in 2 Minuten heraus, was dir gerade im Weg steht – und was dir sofort hilft.</p>
+        <div class="privacy-note">🔒 Deine Eingaben werden nicht gespeichert und bleiben nur auf deinem Gerät.</div>
+        <button class="btn btn-start" onclick="nextScreen('screen-q1')">Check starten ▶</button>
+    </div>
+
+    <!-- FRAGE 1 -->
+    <div id="screen-q1" class="hidden">
+        <h2>Wie fühlst du dich vor einer Schularbeit?</h2>
+        <p class="hint-multi">Wähle eine Antwort aus.</p>
+        <button class="btn btn-option" onclick="selectSingle(this, 'q1', 'calm')">😊 Ich bin ruhig</button>
+        <button class="btn btn-option" onclick="selectSingle(this, 'q1', 'nervous')">😐 Ich bin etwas nervös</button>
+        <button class="btn btn-option" onclick="selectSingle(this, 'q1', 'scared')">😟 Ich habe richtig Angst</button>
+        <button class="btn btn-next" onclick="validateNext('screen-q1', 'screen-q2')">Weiter →</button>
+    </div>
+
+    <!-- FRAGE 2 -->
+    <div id="screen-q2" class="hidden">
+        <h2>Was passiert beim Lernen?</h2>
+        <p class="hint-multi">Mehrere Antworten möglich.</p>
+        <button class="btn btn-option" onclick="toggleMulti(this, 'q2', 'procrastinate')">⏰ Ich schiebe es oft auf</button>
+        <button class="btn btn-option" onclick="toggleMulti(this, 'q2', 'concentration')">💭 Ich kann mich schlecht konzentrieren</button>
+        <button class="btn btn-option" onclick="toggleMulti(this, 'q2', 'forget')">🌀 Ich vergesse schnell wieder, was ich gelernt habe</button>
+        <button class="btn btn-option" onclick="toggleMulti(this, 'q2', 'anxiety')">😰 Ich werde nervös, wenn ich an die Schularbeit denke</button>
+        <button class="btn btn-next" onclick="validateNext('screen-q2', 'screen-q3')">Weiter →</button>
+    </div>
+
+    <!-- FRAGE 3 -->
+    <div id="screen-q3" class="hidden">
+        <h2>Was passiert in der Prüfung?</h2>
+        <p class="hint-multi">Mehrere Antworten möglich.</p>
+        <button class="btn btn-option" onclick="toggleMulti(this, 'q3', 'blackout')">🌑 Mein Kopf ist plötzlich leer (Blackout)</button>
+        <button class="btn btn-option" onclick="toggleMulti(this, 'q3', 'physical')">💓 Ich bin sehr nervös (Herzklopfen etc.)</button>
+        <button class="btn btn-option" onclick="toggleMulti(this, 'q3', 'errors')">✏️ Ich mache viele Flüchtigkeitsfehler</button>
+        <button class="btn btn-option" onclick="toggleMulti(this, 'q3', 'time')">⌛ Ich habe Zeitdruck</button>
+        <button class="btn btn-next" onclick="calculateResult()">Mein Ergebnis anzeigen ✨</button>
+    </div>
+
+    <!-- ERGEBNIS -->
+    <div id="screen-result" class="hidden">
+        <h1>Dein Ergebnis</h1>
+        <div id="result-text" class="result-box"></div>
+
+        <h3>⚡ Soforthilfe für dich</h3>
+        <div id="exercise-text"></div>
+
+        <h3>📅 Dein Mini-Lernplan</h3>
+        <div class="plan-day"><div class="plan-day-num">1</div><div><strong>Überblick</strong><br>Schreib auf, was alles drankommt – mach eine Liste oder eine Mindmap.</div></div>
+        <div class="plan-day"><div class="plan-day-num">2</div><div><strong>Verstehen</strong><br>Geh die Themen durch und erkläre sie dir selbst mit eigenen Worten.</div></div>
+        <div class="plan-day"><div class="plan-day-num">3</div><div><strong>Üben</strong><br>Mach Aufgaben und Übungsbeispiele – am besten ohne nachzuschauen.</div></div>
+        <div class="plan-day"><div class="plan-day-num">4</div><div><strong>Wiederholen + Mini-Test</strong><br>Teste dich selbst: Was weißt du noch? Was musst du nochmal anschauen?</div></div>
+
+        <button class="btn export-btn" onclick="exportPDF()">📄 Lernplan als PDF speichern</button>
+
+        <div class="cta-box">
+            <strong>Wenn du dich hier wiedererkennst:</strong><br>
+            Genau das trainieren wir im Workshop <strong>„Mut im Kopf"</strong>.
+            <ul>
+                <li>✨ Ruhiger in Prüfungen werden</li>
+                <li>✨ Dich besser konzentrieren</li>
+                <li>✨ Mit Nervosität umgehen</li>
+            </ul>
+            <button class="btn btn-start" onclick="window.open('https://www.mentallions.at/kontakt/', '_blank')">Jetzt Workshop anfragen →</button>
+        </div>
+
+        <button class="btn" style="background:#eee;color:var(--text)" onclick="restart()">🔄 Nochmal machen</button>
+    </div>
+
+    <div class="footer-note">
+        Hinweis: Diese App dient nur zur allgemeinen Unterstützung beim Lernen und im Umgang mit Nervosität. Sie ersetzt keine Therapie, keine medizinische oder psychologische Beratung.<br>
+        Deine Eingaben werden nicht gespeichert und bleiben nur auf deinem Gerät.
+    </div>
+
+</div>
+
+<script>
+    let answers = { q1: '', q2: [], q3: [] };
+    let finalType = '';
+    let finalExercises = [];
+
+    const TYPES = {
+        blackout: {
+            label: 'BLACKOUT-TYP',
+            emoji: '🌑',
+            description: 'Du weißt oft mehr, als du in der Prüfung zeigen kannst. Wenn der Druck kommt, macht dein Kopf manchmal zu – das ist eine ganz normale Schutzreaktion deines Körpers. Mit den richtigen Tricks kannst du das ändern!',
+            exercises: [
+                { name: '🦶 Boden-Übung', text: 'Stelle beide Füße fest auf den Boden und drücke sie 10 Sekunden lang nach unten. Das hilft deinem Körper, sich sicher zu fühlen und wieder klar zu denken.' },
+                { name: '🌬️ 4-7-8 Atemübung', text: 'Atme 4 Sekunden ein, halte 7 Sekunden an, atme 8 Sekunden aus. Das beruhigt dein Nervensystem sofort.' }
+            ]
+        },
+        aufschieber: {
+            label: 'AUFSCHIEBER-TYP',
+            emoji: '⏰',
+            description: 'Du kennst das: Du willst anfangen, aber irgendwie passiert es nie. Das hat nichts mit Faulheit zu tun – oft steckt dahinter Überforderung oder Angst davor, es falsch zu machen. Es gibt einfache Tricks, die wirklich helfen!',
+            exercises: [
+                { name: '⏱️ 5-Minuten-Trick', text: 'Sag dir: „Ich lerne nur 5 Minuten." Danach darfst du aufhören – aber meistens machst du von selbst weiter, weil der Start das Schwerste ist.' },
+                { name: '📝 Eine-Sache-Regel', text: 'Schreib nur EINE Aufgabe auf, die du heute machst. Nicht drei, nicht fünf – nur eine. Das macht den Anfang viel leichter.' }
+            ]
+        },
+        unsicher: {
+            label: 'UNSICHER-TYP',
+            emoji: '🌀',
+            description: 'Du lernst und lernst – aber das Gefühl bleibt, dass es nicht reicht. Das ist sehr häufig und bedeutet meistens nicht, dass du zu wenig weißt, sondern dass dein Kopf gerade unter Druck steht. Du kannst das trainieren!',
+            exercises: [
+                { name: '🌟 Mini-Erfolg', text: 'Starte mit einer ganz einfachen Aufgabe, die du sicher kannst. Das gibt deinem Gehirn ein Erfolgssignal – und dann läuft es viel besser.' },
+                { name: '🗣️ Erklär-Trick', text: 'Erkläre den Lernstoff laut dir selbst oder einem Teddy. Wenn du es erklären kannst, weißt du es wirklich.' }
+            ]
+        },
+        konzentration: {
+            label: 'KONZENTRATIONS-TYP',
+            emoji: '💭',
+            description: 'Deine Gedanken schweifen ab, oder Fehler schleichen sich ein? Das ist kein Zeichen von zu wenig Wissen – dein Gehirn braucht einfach die richtige Struktur. Mit kurzen Lerneinheiten und Pausen läuft es viel besser!',
+            exercises: [
+                { name: '⏳ Timer-Trick', text: 'Lerne 10 Minuten mit Timer – dann 5 Minuten echte Pause (nicht Handy!). Kurze Einheiten helfen deinem Gehirn, besser aufzupassen.' },
+                { name: '✅ Haken-Liste', text: 'Schreib auf, was du heute lernst, und mach nach jeder Aufgabe einen Haken. Das hält dich bei der Sache und gibt dir ein gutes Gefühl!' }
+            ]
+        }
+    };
+
+    function nextScreen(nextId) {
+        document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+        document.getElementById(nextId).classList.remove('hidden');
+        document.getElementById('progressContainer').classList.remove('hidden');
+        const step = nextId === 'screen-q1' ? 25 : nextId === 'screen-q2' ? 50 : nextId === 'screen-q3' ? 75 : 100;
+        document.getElementById('progressBar').style.width = step + '%';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function selectSingle(btn, q, val) {
+        answers[q] = val;
+        btn.parentNode.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+    }
+
+    function toggleMulti(btn, q, val) {
+        if (answers[q].includes(val)) {
+            answers[q] = answers[q].filter(v => v !== val);
+            btn.classList.remove('selected');
+        } else {
+            answers[q].push(val);
+            btn.classList.add('selected');
+        }
+    }
+
+    function validateNext(current, next) {
+        if (current === 'screen-q1' && !answers.q1) {
+            alert('Bitte wähle eine Antwort aus.');
+            return;
+        }
+        nextScreen(next);
+    }
+
+    function calculateResult() {
+        let scores = { blackout: 0, aufschieber: 0, unsicher: 0, konzentration: 0 };
+        if (answers.q1 === 'scared')                        { scores.blackout += 2; scores.unsicher += 1; }
+        else if (answers.q1 === 'nervous')                  { scores.unsicher += 1; scores.aufschieber += 1; }
+        if (answers.q2.includes('procrastinate'))           scores.aufschieber += 2;
+        if (answers.q2.includes('concentration'))           scores.konzentration += 2;
+        if (answers.q2.includes('forget'))                  scores.unsicher += 2;
+        if (answers.q2.includes('anxiety'))                 { scores.blackout += 1; scores.unsicher += 1; }
+        if (answers.q3.includes('blackout'))                scores.blackout += 3;
+        if (answers.q3.includes('physical'))                { scores.blackout += 1; scores.unsicher += 1; }
+        if (answers.q3.includes('errors'))                  scores.konzentration += 2;
+        if (answers.q3.includes('time'))                    scores.konzentration += 1;
+
+        let best = 'unsicher';
+        let bestScore = -1;
+        for (const [key, val] of Object.entries(scores)) {
+            if (val > bestScore) { bestScore = val; best = key; }
+        }
+
+        const d = TYPES[best];
+        finalType = d.label;
+        finalExercises = d.exercises;
+
+        document.getElementById('result-text').innerHTML =
+            `<strong>${d.emoji} ${d.label}</strong><br><br>${d.description}`;
+
+        document.getElementById('exercise-text').innerHTML = d.exercises.map(e =>
+            `<div class="exercise-card"><strong>${e.name}</strong>${e.text}</div>`
+        ).join('');
+
+        nextScreen('screen-result');
+    }
+
+    function exportPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFillColor(69, 123, 157);
+        doc.rect(0, 0, 210, 28, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text('Pruefungsstress-Check – Mein Ergebnis', 15, 18);
+
+        doc.setTextColor(29, 53, 87);
+        let y = 40;
+
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Mein Typ: ' + finalType, 15, y);
+        y += 12;
+
+        doc.setFontSize(12);
+        doc.text('Soforthilfe-Uebungen:', 15, y);
+        y += 7;
+
+        for (const e of finalExercises) {
+            const nameClean = e.name.replace(/[^\w\s\-\.üöäÜÖÄß]/g, '').trim();
+            const textClean = e.text.replace(/[^\w\s\-\.,üöäÜÖÄß\(\)!?]/g, '').trim();
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.text(nameClean, 15, y); y += 6;
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(80, 100, 120);
+            const lines = doc.splitTextToSize(textClean, 175);
+            doc.text(lines, 15, y); y += lines.length * 5 + 6;
+            doc.setTextColor(29, 53, 87);
+        }
+
+        doc.setDrawColor(168, 218, 220);
+        doc.setLineWidth(0.5);
+        doc.line(15, y, 195, y); y += 8;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('Mein 4-Tage-Lernplan:', 15, y); y += 8;
+
+        const plan = [
+            ['Tag 1: Ueberblick',              'Schreib auf, was alles drankommt – mach eine Liste oder Mindmap.'],
+            ['Tag 2: Verstehen',               'Erklaere die Themen dir selbst mit eigenen Worten.'],
+            ['Tag 3: Ueben',                   'Mach Aufgaben – am besten ohne nachzuschauen.'],
+            ['Tag 4: Wiederholen + Mini-Test', 'Teste dich: Was weisst du noch? Was musst du nochmal anschauen?'],
+        ];
+
+        doc.setFontSize(11);
+        for (const [title, text] of plan) {
+            doc.setFillColor(234, 246, 246);
+            doc.roundedRect(14, y - 4, 180, 15, 3, 3, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(29, 53, 87);
+            doc.text(title, 18, y + 3); y += 8;
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(80, 100, 120);
+            doc.text(text, 18, y + 2); y += 10;
+            doc.setTextColor(29, 53, 87);
+        }
+
+        doc.setFontSize(9);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Keine Datenspeicherung. Keine medizinische Beratung. | www.mentallions.at', 15, 282);
+
+        doc.save('Mein-Lernplan-Mentallions.pdf');
+    }
+
+    function restart() {
+        answers = { q1: '', q2: [], q3: [] };
+        finalType = '';
+        finalExercises = [];
+        document.querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+        document.getElementById('progressContainer').classList.add('hidden');
+        document.getElementById('progressBar').style.width = '0%';
+        document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
+        document.getElementById('screen-start').classList.remove('hidden');
+        document.getElementById('footer-note').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
